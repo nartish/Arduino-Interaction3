@@ -36,8 +36,7 @@ void setup ()
 
   //motor
    pinMode(pwm,OUTPUT) ; //we have to set PWM pin as output
-   pinMode(in_1,OUTPUT) ; //Logic pins are also set as output
-   pinMode(in_2,OUTPUT) ;
+   
   //proximity sensor
   pinMode(TriggerPin,OUTPUT);  // Trigger is an output pin
   pinMode(EchoPin,INPUT);      // Echo is an input pin
@@ -72,6 +71,7 @@ void loop ()
    delay(300) ;
    //For brake
    digitalWrite(in_1,LOW) ;
+   analogWrite(pwm,100) ;
     
     }
   }
@@ -81,6 +81,8 @@ void loop ()
       Serial.println("quiet");
       bAlarm = false;
       digitalWrite(led, LOW);
+      analogWrite(pwm,0) ;
+      
     }
   }
 
@@ -103,10 +105,21 @@ void loop ()
 
   if (safetyDistance <= 10){
     digitalWrite(led, HIGH);   //light turning on cuz of proximity
-    
+        //For Clock wise motion , in_1 = High , in_2 = Low
+   digitalWrite(in_1,HIGH) ;
+   digitalWrite(in_2,LOW) ;
+   analogWrite(pwm,255) ;
+   /* setting pwm of the motor to 255 we can change the speed of rotation
+   by changing pwm input but we are only using arduino so we are using highest
+   value to driver the motor */
+   //Clockwise for 3 secs
+   delay(300) ;
+   //For brake
+   digitalWrite(in_1,LOW) ;
   }
   else{
     digitalWrite(led, LOW);
+    analogWrite(pwm,0) ;
   }
  
   Serial.print("Distance = ");             // Output to serial
