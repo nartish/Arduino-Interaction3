@@ -1,22 +1,22 @@
-//
-const int TriggerPin = 9;      //Trig pin
-const int EchoPin = 10;         //Echo pin
-long Duration = 1;
-const int led = 2;
-
-long safetyDuration;
-int distance;
-int safetyDistance;
-
-//microphone
-int soundDetectedPin = 8; // Use Pin 8 as our Input
-int soundDetectedVal = HIGH; // This is where we record our Sound Measurement
-boolean bAlarm = false;
-unsigned long lastSoundDetectTime; // Record the time that we measured a sound
-int soundAlarmTime = 500; // Number of milli seconds to keep the sound alarm high
-
-//vib motor
-int motorPin = 3;
+  //
+  const int TriggerPin = 9;      //Trig pin
+  const int EchoPin = 10;         //Echo pin
+  long Duration = 1;
+  const int led = 2;
+  
+  long safetyDuration;
+  int distance;
+  int safetyDistance;
+  
+  //microphone
+  int soundDetectedPin = 8; // Use Pin 8 as our Input
+  int soundDetectedVal = HIGH; // This is where we record our Sound Measurement
+  boolean bAlarm = false;
+  unsigned long lastSoundDetectTime; // Record the time that we measured a sound
+  int soundAlarmTime = 500; // Number of milli seconds to keep the sound alarm high
+  
+  //vib motor
+  int motorPin = 3;
 
 
 void setup() {
@@ -26,16 +26,17 @@ void setup() {
   pinMode(led, OUTPUT);
   Serial.begin(9600);          // Serial Output
 
-//microphone  
+  //microphone  
   pinMode (soundDetectedPin, INPUT) ; // input from the Sound Detection Module
 
 
-//motor
+  //motor
   pinMode(motorPin, OUTPUT);
   Serial.begin(9600);
   while (! Serial);
   Serial.println("Speed 0 to 255");
 }
+
 
 void loop() {
 
@@ -56,7 +57,15 @@ delayMicroseconds(2);
 
 
   if (safetyDistance <= 10){
-    digitalWrite(led, HIGH);
+    digitalWrite(led, HIGH);   //light turning on cuz of proximity
+    if (Serial.available())    //motor turning on cuz of proximity
+  {
+    int speed = Serial.parseInt();
+    if (speed >= 0 && speed <= 255)
+    {
+      analogWrite(motorPin, speed);
+  }
+  }
   }
   else{
     digitalWrite(led, LOW);
@@ -66,8 +75,6 @@ delayMicroseconds(2);
   Serial.print(Distance_cm);
   Serial.println(" cm");
   delay(400);                             // Wait to do next measurement
-
-
 
 
     //microphone
@@ -83,20 +90,8 @@ delayMicroseconds(2);
     if (!bAlarm){
       Serial.println("LOUD, LOUD");
       bAlarm = true;
-    }
-  }
-  else
-  {
-    if( (millis()-lastSoundDetectTime) > soundAlarmTime  &&  bAlarm){
-      Serial.println("quiet");
-      bAlarm = false;
-    }
-  }
-
-
-
-  //motor
-    if (Serial.available())
+      digitalWrite(led, HIGH);   //light turning on cuz of sound
+      if (Serial.available())   //motor turning on cuz of sound
   {
     int speed = Serial.parseInt();
     if (speed >= 0 && speed <= 255)
@@ -104,6 +99,20 @@ delayMicroseconds(2);
       analogWrite(motorPin, speed);
   }
   }
+    }
+  }
+  else
+  {
+    if( (millis()-lastSoundDetectTime) > soundAlarmTime  &&  bAlarm){
+      Serial.println("quiet");
+      bAlarm = false;
+      digitalWrite(led, LOW);
+    }
+  }
+
+
+
+  
 } 
 
 
